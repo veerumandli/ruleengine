@@ -1,0 +1,22 @@
+{
+    "name": "veerumandli/ruleengine",
+    "description": "Creating the engine for all kind of channels",
+    "authors": [
+        {
+            "name": "Veeru",
+            "email": "veeru.mandli@gmail.com"
+        }
+    ],
+    "require": {
+        "swiftmailer/swiftmailer": "^5.4",
+        "sendgrid/sendgrid": "^6.0",
+        "mandrill/mandrill": "^1.0",
+        "daniel-zahariev/php-aws-ses": "^0.8.9",
+        "joshcam/mysqli-database-class": "dev-master"
+    },
+     "autoload": {
+        "psr-4": {
+            "Princealikhan\\Mautic\\": "src/"
+        }
+    }    
+}
