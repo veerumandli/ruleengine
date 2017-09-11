@@ -70,8 +70,6 @@ class Email extends Ruleengine
 				$result = self::$activeProviderObj->post(self::$message);
 			else
 				$result = self::$activeProviderObj->send(self::$message);
-
-			pr($result);
 			return $result;
 		}catch(Exception $e){
 			throw $e;
