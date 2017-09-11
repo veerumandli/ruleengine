@@ -33,6 +33,7 @@ class Email extends Ruleengine
 
 	static function init($group=0, $provider='', $any_reference_provider = ''){
 		parent::init($group,self::$channelId);
+		$provider = self:groupExist($group, $provider);
 		self::$activeChannel = parent::zdb()->join("providers p","p.pid = c.default_provider","LEFT")->where("c.cid",self::$channelId)->getOne('channels c');
 		if(!self::$activeChannel){
 			die('Channel is not exist. Please contact your admin');
@@ -57,6 +58,14 @@ class Email extends Ruleengine
 		self::$activeProviderObj = new self::$zjbProvider(self::$transport);
 	}
 
+	public static function groupExist($group=0,$provider=''){
+		if(!$group) return false;
+		$exist = parent::zdb()->where("id",$group)->where('status',1)->getOne('subscriber_groups');
+		if($exist)
+			return $exist['vendor_slug'];
+		else
+			return $provider;
+	}
 
 	public static function activeProvider(){
 		return self::$activeProviderObj;
