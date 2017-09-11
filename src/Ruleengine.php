@@ -1,5 +1,5 @@
 <?php
-namespace Ruleengine;
+namespace Veerumandli\Ruleengine;
 
 require_once(dirname(__FILE__) . '/init.php');
 

@@ -1,6 +1,6 @@
 <?php
 
-namespace Ruleengine;
+namespace Veerumandli\Ruleengine;
 
 include_once (dirname(__FILE__) . '/Ruleengine.php');
 

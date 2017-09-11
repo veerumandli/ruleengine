@@ -29,7 +29,6 @@ if (defined('ENVIRONMENT'))
 
 include_once dirname(__FILE__).'/inc/database.php';
 require_once dirname(__FILE__).'/lib/helper.php';
-include dirname(__FILE__).'/vendor/autoload.php';
 
 
 new MysqliDb ($db[$active_group]);
