@@ -31,9 +31,11 @@ class Email extends Ruleengine
 
 	public static $any_reference_provider;
 
+	public static $subscribeStatus;
+
 	static function init($group=0, $provider='', $any_reference_provider = ''){
 		parent::init($group,self::$channelId);
-		$provider = self:groupExist($group, $provider);
+		$provider = self::groupExist($group, $provider);
 		self::$activeChannel = parent::zdb()->join("providers p","p.pid = c.default_provider","LEFT")->where("c.cid",self::$channelId)->getOne('channels c');
 		if(!self::$activeChannel){
 			die('Channel is not exist. Please contact your admin');
@@ -55,7 +57,7 @@ class Email extends Ruleengine
 		}
 		$transport_name = self::$activeChannel['slug_name'].'_transport';
 		self::$transport_name();
-		self::$activeProviderObj = new self::$zjbProvider(self::$transport);
+		
 	}
 
 	public static function groupExist($group=0,$provider=''){
@@ -77,6 +79,8 @@ class Email extends Ruleengine
 		try{
 			if(self::$activeChannel['slug_name']=='sendgrid')
 				$result = self::$activeProviderObj->post(self::$message);
+			else if(self::$activeChannel['slug_name']=='amazon')
+				$result = self::$activeProviderObj->sendEmail(self::$message);
 			else
 				$result = self::$activeProviderObj->send(self::$message);
 			return $result;
@@ -131,7 +135,7 @@ class Email extends Ruleengine
 		$provider_meta = parent::zdb()->where("provider_id",self::$activeChannel['pid'])->get('provider_meta',null,'meta_value,meta_key');
 		$provider_meta = array_column($provider_meta,'meta_value','meta_key');
 		self::$transport = $provider_meta['api_key'];
-
+		self::$activeProviderObj = new self::$zjbProvider(self::$transport);
 	}
 
 	public static function sendgrid_message(){
@@ -151,6 +155,23 @@ class Email extends Ruleengine
 		self::$activeProviderObj = self::$activeProviderObj->client->mail()->send();
 	}	
 
+	public static function amazon_transport(){
+		$provider_meta = parent::zdb()->where("provider_id",self::$activeChannel['pid'])->get('provider_meta',null,'meta_value,meta_key');
+		$provider_meta = array_column($provider_meta,'meta_value','meta_key');
+		self::$transport = array($provider_meta['AccessKey'],$provider_meta['SecretKey']);
+		self::$activeProviderObj = new self::$zjbProvider(...self::$transport);
+	}	
+
+	public static function amazon_message(){
+		$m = new \SimpleEmailServiceMessage();
+		$m->addTo(self::$to_emails);
+		$m->setFrom(end(self::$from_email).' <'.key(self::$from_email).'>');
+		$m->setSubject(self::$subject);
+		$m->setMessageFromString('',self::$body);
+		self::$message = $m;
+
+	}	
+
 	public static function smtp_transport(){
 		if(self::$any_reference_provider){
 			$provider_meta = parent::zdb()->where("provider_id",self::$activeChannel['pid'])->where("any_reference_provider",self::$any_reference_provider)->get('provider_meta',null,'meta_value,meta_key');
@@ -161,6 +182,7 @@ class Email extends Ruleengine
 		self::$transport =  (new \Swift_SmtpTransport($provider_meta['hostname'], $provider_meta['port']))
 					  ->setUsername($provider_meta['username'])
 					  ->setPassword($provider_meta['password']);
+		self::$activeProviderObj = new self::$zjbProvider(self::$transport);			  
 	}
 
 	public static function smtp_message(){
